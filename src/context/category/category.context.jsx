@@ -3,10 +3,10 @@ import { deleteListingDocument, getCategoryAndDocuments, addListingDocument } fr
 import { toast } from "react-toastify";
 
 export const CategoryContext = createContext({
-    categories: [],
-    setCategories: () => [],
     listings: [],
     setListings: () => [],
+    addListingItem: () => null,
+    deleteListingItem: () => null,
 });
 const HOUSES_DATA = [
     {
@@ -74,15 +74,11 @@ export const CategoriesProvider = ({ children }) => {
     const [listings, setListings] = useState([]);
 
     const addListingItem = async (listing) => {
-        try {
-            await addListingDocument(listing);
-            const newItems = await fetchCategories();
-            setListings(newItems);
-            // Or setListings([...listings, listing]);
-            toast.success("listing is added");
-        } catch (error) {
-            toast.error(error);
-        }
+        await addListingDocument(listing);
+        const newItems = await fetchCategories();
+        setListings(newItems);
+        // Or setListings([...listings, listing]);
+        toast.success("listing is added");
     }
     const deleteListingItem = async (listingId) => {
         await deleteListingDocument(listingId);
@@ -96,10 +92,6 @@ export const CategoriesProvider = ({ children }) => {
             toast.error(error);
         }
     }
-
-    useEffect(() => {
-
-    }, [])
 
     const value = { listings, setListings, addListingItem, deleteListingItem };
     return <CategoryContext.Provider value={value}>{children}</CategoryContext.Provider>

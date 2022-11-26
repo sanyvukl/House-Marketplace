@@ -13,7 +13,7 @@ import { getListingsAndDocuments } from "../../utils/firebase/firebase.utils";
 
 const SignIn = () => {
     const navigate = useNavigate();
-    const { signInWithEmail, signInWithGoogle, setIsLoading } = useContext(UserContext);
+    const { signInWithEmail, signInWithGoogle, setIsUserLoading } = useContext(UserContext);
     const [isShowPassword, setIsShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: "",
@@ -38,7 +38,7 @@ const SignIn = () => {
     };
     const onSubmitHandler = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+        setIsUserLoading(true);
         try {
             await signInWithEmail(email, password);
             toast.success("Signed In Succesfully");
@@ -47,7 +47,7 @@ const SignIn = () => {
         } catch (error) {
             checkErrors(error);
         }
-        setIsLoading(false);
+        setIsUserLoading(false);
     }
     const onChange = (event) => {
         const { id, value } = event.target;

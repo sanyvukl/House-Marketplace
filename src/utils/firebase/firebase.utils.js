@@ -27,6 +27,8 @@ import {
   addDoc,
 } from "firebase/firestore";
 
+import {getStorage} from "firebase/storage";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAhUUwW_Q4Pnp6ryGKbvjSSzPIZlkksrBU",
   authDomain: "house-marketplace-81f4e.firebaseapp.com",

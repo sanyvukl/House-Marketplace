@@ -1,7 +1,9 @@
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/user/user.context";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import arrowRight from "../../assets/svg/keyboardArrowRightIcon.svg";
+import homeIcon from "../../assets/svg/homeIcon.svg";
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -69,30 +71,36 @@ const Profile = () => {
                         {isChangedDetails ? "Done" : "Change"}
                     </p>
                 </div>
-            </main>
 
-            <div className="profileCard">
-                <form>
-                    <input
-                        type="text"
-                        name="displayName"
-                        className={!isChangedDetails ? "profileName" : "profileNameActive"}
-                        disabled={!isChangedDetails}
-                        onChange={onChangeInput}
-                        placeholder="Your name"
-                        value={displayName}
-                    />
-                    <input
-                        type="email"
-                        name="email"
-                        className={!isChangedDetails ? "profileEmail" : "profileEmailActive"}
-                        disabled={!isChangedDetails}
-                        onChange={onChangeInput}
-                        placeholder="Your email"
-                        value={email}
-                    />
-                </form>
-            </div>
+                <div className="profileCard">
+                    <form>
+                        <input
+                            type="text"
+                            name="displayName"
+                            className={!isChangedDetails ? "profileName" : "profileNameActive"}
+                            disabled={!isChangedDetails}
+                            onChange={onChangeInput}
+                            placeholder="Your name"
+                            value={displayName}
+                        />
+                        <input
+                            type="email"
+                            name="email"
+                            className={!isChangedDetails ? "profileEmail" : "profileEmailActive"}
+                            disabled={!isChangedDetails}
+                            onChange={onChangeInput}
+                            placeholder="Your email"
+                            value={email}
+                        />
+                    </form>
+                </div>
+
+                <Link to="/create-listing" className="createListing">
+                    <img src={homeIcon} alt="home" />
+                    <p>Sell or rent your home</p>
+                    <img src={arrowRight} alt="go" />
+                </Link>
+            </main>
         </div>
     );
 };

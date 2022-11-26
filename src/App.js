@@ -32,12 +32,12 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const getListingData = async() =>{
+    const getListingData = async () => {
       const listings = await getCategoryAndDocuments();
       setListings(listings);
-    }
+    };
     getListingData();
-  },[]);
+  }, []);
 
   return (
     <Fragment>
@@ -52,7 +52,9 @@ const App = () => {
           <Route path="sign-in" element={<SignIn />} />
           <Route path="sign-up" element={<SignUp />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="create-listing" element={<CreateListing />} />
+          <Route path="create-listing" element={<PrivateRoute />}>
+            <Route path="/create-listing" element={<CreateListing />} />
+          </Route>
         </Route>
       </Routes>
       <ToastContainer />

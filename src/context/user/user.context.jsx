@@ -14,7 +14,9 @@ import { signOutUser } from "../../utils/firebase/firebase.utils";
 
 export const UserContext = createContext({
     currentUser: null,
+    isUserLoading: null,
     setCurrentUser: () => null,
+    setIsUserLoading: () => null,
     logOutUser: () => null,
     signInWithEmail: () => null,
     signInWithGoogle: () => null,
@@ -24,7 +26,7 @@ export const UserContext = createContext({
 export const UserProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState({});
     const [isLogged, setIsLogged] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isUserLoading, setIsUserLoading] = useState(false);
     useEffect(() => {
         const unsubscribe = onAuthStateChangedListener(async (user) => {
             if (user) {
@@ -95,7 +97,7 @@ export const UserProvider = ({ children }) => {
         await updateUserDocument(currentUser.uid, update);
     };
 
-    const value = { currentUser, isLogged, isLoading, setIsLoading, setCurrentUser, logOutUser, signInWithEmail, signInWithGoogle, signUpWithEmail, updateUserData };
+    const value = { currentUser, isLogged, isUserLoading, setIsUserLoading, setCurrentUser, logOutUser, signInWithEmail, signInWithGoogle, signUpWithEmail, updateUserData };
 
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
