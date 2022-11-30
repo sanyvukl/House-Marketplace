@@ -27,20 +27,21 @@ export const UserProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState({});
     const [isLogged, setIsLogged] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(false);
-    useEffect(() => {
-        const unsubscribe = onAuthStateChangedListener(async (user) => {
-            if (user) {
-                try {
-                    await createUserDocumentFromAuth(user);
-                    setCurrentUser(user);
-                    console.log("User UseEffect fired");
-                } catch (error) {
-                    toast.error("Incorrect User Credentials");
-                }
-            }
-        });
-        return unsubscribe;
-    }, []);
+
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChangedListener(async (user) => {
+    //         if (user) {
+    //             try {
+    //                 await createUserDocumentFromAuth(user);
+    //                 setCurrentUser(user);
+    //                 console.log("User Seted auto");
+    //             } catch (error) {
+    //                 toast.error("Incorrect User Credentials");
+    //             }
+    //         }
+    //     });
+    //     unsubscribe();
+    // }, []);
 
     const checkErrors = (error) => {
         switch (error.code) {
@@ -57,6 +58,7 @@ export const UserProvider = ({ children }) => {
                 console.log(error);
                 break;
         };
+        setIsUserLoading(false);
     };
     const logOutUser = async () => {
         try {
@@ -71,7 +73,6 @@ export const UserProvider = ({ children }) => {
     const signInWithEmail = async (email, password) => {
         const { user } = await signInUserWithEmailAndPassword(email, password);
         setCurrentUser(user);
-        setIsLogged(true);
     };
     const signInWithGoogle = async () => {
         try {

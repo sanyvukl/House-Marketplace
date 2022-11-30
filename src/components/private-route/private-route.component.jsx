@@ -4,11 +4,12 @@ import { UserContext } from "../../context/user/user.context";
 import Spinner from "../Spinner/spinner.component";
 
 const PrivateRoute = () => {
-    const { isLogged, isUserLoading } = useContext(UserContext);
+    const { isUserLoading, currentUser } = useContext(UserContext);
+
     if (isUserLoading) {
         return <Spinner />
     }
-    return isLogged ? <Outlet /> : <Navigate to="/sign-in" />
+    return currentUser ? <Outlet /> : <Navigate to="/sign-in" />
 }
 
 export default PrivateRoute;

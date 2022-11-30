@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/user/user.context";
 import { CategoryContext } from "../../context/category/category.context";
 import Spinner from "../Spinner/spinner.component";
+import { toast } from "react-toastify";
+import { getStoreImagesUrl } from "../../utils/firebase/firebase.utils";
+import { serverTimestamp } from "firebase/firestore";
 
 const CreateListing = () => {
     const navigate = useNavigate();
@@ -60,23 +63,53 @@ const CreateListing = () => {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
-        const listing = {
-            type,
-            name,
-            bathrooms,
-            bedrooms,
-            regularPrice,
-            discountedPrice,
-            geolocation: { lng: longitude, lat: latitude },
-            imageUrls: ["1","2"],
-            location: address,
-            offer,
-            parking,
-            furnished,
-            // timestamp: { seconds: 1669068990, nanoseconds: 974000000 },
-            userRef
+        if (images.length > 6) {
+            toast.error("max is 6 images");
+            return;
         }
-        await addListingItem(listing);
+        if (offer && (regularPrice < discountedPrice)) {
+            toast.error("Discounted price must be lower");
+            return;
+        }
+        if (discountedPrice === 0 && regularPrice > 0) {
+            setFormData({ ...formData, discountedPrice: 0, offer: false });
+        }
+        let geolocation = {};
+        let location;
+        if (geolocationEnabled) {
+            const responce = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${address}
+                 &key=AIzaSyCjtfnkdDwh4I7yR1CV77cXIk5ljioYVxw`);
+            const data = await responce.json();
+            geolocation.lat = data.results[0]?.geometry.location.lat ?? 0;
+            geolocation.lng = data.results[0]?.geometry.location.lng ?? 0;
+            location = data.status === "ZERO_RESULTS" ? undefined : data.results[0]?.formatted_address;
+            if (location === undefined) {
+                toast.error("Enter correct address");
+                return;
+            }
+        } else {
+            geolocation.lat = latitude;
+            geolocation.lng = longitude;
+            location = address;
+        }
+        const imageUrls = await Promise.all(
+            [...images].map((image) => getStoreImagesUrl(image))
+        ).catch(() => {
+            toast.error("Images not uploaded");
+            return;
+        });
+        const listing = {
+            type, name, bathrooms,
+            bedrooms, regularPrice,
+            discountedPrice, geolocation,
+            imageUrls, location, offer,
+            parking, furnished,
+            timestamp: serverTimestamp(),
+            userRef,
+        };
+        const id = await addListingItem(listing);
+        navigate(`/category/${type}/${id}`);
     };
 
     return isUserLoading ? <Spinner /> : (

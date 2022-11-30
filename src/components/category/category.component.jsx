@@ -6,7 +6,7 @@ import Spinner from "../Spinner/spinner.component";
 
 const Category = () => {
     const params = useParams();
-    const { listings, deleteListingItem } = useContext(CategoryContext);
+    const { listings, deleteListingItemById } = useContext(CategoryContext);
 
     return (
         <div className="category">
@@ -23,16 +23,18 @@ const Category = () => {
                 ? <main>
                     <ul className="categoryListings">
                         {listings
-                        .filter((listing) => listing.data.type === params.categoryName)
-                        .map((listing) => {
-                            const { id, data } = listing;
-                            return (
-                                <ListingItem key={id} id={id} listing={data} onDelete={deleteListingItem} />
-                            );
-                        })}
+                            .filter((listing) => listing.data.type === params.categoryName)
+                            .map((listing) => {
+                                const { id, data } = listing;
+                                return (
+                                    <ListingItem key={id} id={id} listing={data} onDelete={()=>deleteListingItemById(id)} />
+                                );
+                            })}
                     </ul>
                 </main>
-                : <p>No Listings for {params.categoryName}</p>}
+                : <Spinner />}
+
+            {/* // : <p>No Listings for {params.categoryName}</p> */}
         </div>
     );
 }

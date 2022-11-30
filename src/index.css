@@ -315,9 +315,11 @@ button {
 }
 
 .swiperSlideDiv {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  /* position: relative; */
+  min-width: 100%;
+  min-height: 50vh;
+  /* max-height: 60vh; */
+  /* object-fit: cover; */
 }
 
 .swiperSlideImg {
@@ -520,6 +522,7 @@ button {
   font-weight: 600;
   font-size: 0.8rem;
   margin-right: 1rem;
+  text-transform: capitalize;
 }
 
 .listingDetailsList {

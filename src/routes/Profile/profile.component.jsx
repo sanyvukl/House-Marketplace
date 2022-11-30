@@ -1,16 +1,32 @@
-import { useContext, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/user/user.context";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import arrowRight from "../../assets/svg/keyboardArrowRightIcon.svg";
 import homeIcon from "../../assets/svg/homeIcon.svg";
+import Spinner from "../../components/Spinner/spinner.component";
+import MyListings from "../../components/my-listings/my-listings.component";
+import { getCurrentUser } from "../../utils/firebase/firebase.utils";
+import { getUserListings } from "../../utils/firebase/firebase.utils";
+
+import ListingItem from "../../components/listing-item/listing-item";
 
 const Profile = () => {
     const navigate = useNavigate();
     const { currentUser, logOutUser, updateUserData } = useContext(UserContext);
     const [isChangedDetails, setIsChangedDetails] = useState(false);
-    const [currentUserInfo, setCurrentUserInfo] = useState(currentUser);
-    const { displayName, email } = currentUserInfo;
+    const [currentUserInfo, setCurrentUserInfo] = useState({
+        displayName: null,
+        email: null
+    });
+
+    useEffect(() => {
+        const getUser = async () => {
+            const user = await getCurrentUser();
+            setCurrentUserInfo(user);
+        }
+        getUser();
+    }, [])
 
     const onLogOutHandle = () => {
         logOutUser();
@@ -26,10 +42,10 @@ const Profile = () => {
     const onUpdateSubmit = async () => {
         if (!currentUser) return;
         const updateData = {
-            displayName: displayName,
-            email: email,
+            displayName: currentUserInfo.displayName,
+            email: currentUserInfo.email,
         }
-        if (currentUser.displayName !== displayName || currentUser.email !== email) {
+        if (currentUser.displayName !== currentUserInfo.displayName || currentUser.email !== currentUserInfo.email) {
             try {
                 await updateUserData(updateData);
                 toast.success("Info changed successfuly");
@@ -45,7 +61,8 @@ const Profile = () => {
     };
 
 
-    return (
+
+    return currentUserInfo.displayName === null ? <Spinner /> : (
         <div className="profile">
             <header className="profileHeader">
                 <p className="pageHeader">My Profile</p>
@@ -81,7 +98,7 @@ const Profile = () => {
                             disabled={!isChangedDetails}
                             onChange={onChangeInput}
                             placeholder="Your name"
-                            value={displayName}
+                            value={currentUserInfo.displayName}
                         />
                         <input
                             type="email"
@@ -90,7 +107,7 @@ const Profile = () => {
                             disabled={!isChangedDetails}
                             onChange={onChangeInput}
                             placeholder="Your email"
-                            value={email}
+                            value={currentUserInfo.email}
                         />
                     </form>
                 </div>
@@ -100,6 +117,9 @@ const Profile = () => {
                     <p>Sell or rent your home</p>
                     <img src={arrowRight} alt="go" />
                 </Link>
+
+                <MyListings userId={currentUser.uid} />
+
             </main>
         </div>
     );

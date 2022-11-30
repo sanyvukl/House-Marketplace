@@ -12,6 +12,8 @@ import Navigation from "./components/navigation/navigation.component";
 import PrivateRoute from "./components/private-route/private-route.component";
 import Category from "./components/category/category.component";
 import CreateListing from "./components/create-listing/create-listing.component";
+import Listing from "./components/listing/listing.component";
+import Contact from "./components/contact/contact.component";
 
 import { useContext } from "react";
 import { UserContext } from "./context/user/user.context";
@@ -25,8 +27,8 @@ const App = () => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const unsubscribe = await getCurrentUser();
-      setCurrentUser(unsubscribe);
+      const user = await getCurrentUser();
+      setCurrentUser(user);
     };
     getUserData();
   }, []);
@@ -45,6 +47,10 @@ const App = () => {
         <Route path="/" element={<Navigation />}>
           <Route index={true} element={<Explore />} />
           <Route path="category/:categoryName" element={<Category />} />
+          <Route
+            path="category/:categoryName/:listingId"
+            element={<Listing />}
+          />
           <Route path="offers" element={<Offers />} />
           <Route path="profile" element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
@@ -55,6 +61,7 @@ const App = () => {
           <Route path="create-listing" element={<PrivateRoute />}>
             <Route path="/create-listing" element={<CreateListing />} />
           </Route>
+          <Route path="contact/:landlordId" element={<Contact />} />
         </Route>
       </Routes>
       <ToastContainer />

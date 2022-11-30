@@ -25,9 +25,21 @@ import {
   updateDoc,
   deleteDoc,
   addDoc,
+  limit,
+  orderBy,
+  where,
 } from "firebase/firestore";
 
-import {getStorage} from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  deleteObject,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { toast } from "react-toastify";
+
+import { v4 as uuidv4 } from "uuid";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAhUUwW_Q4Pnp6ryGKbvjSSzPIZlkksrBU",
@@ -39,9 +51,81 @@ const firebaseConfig = {
   measurementId: "G-E49HPGMCBV",
 };
 const firebaseApp = initializeApp(firebaseConfig);
-export const auth = getAuth();
-const db = getFirestore();
 
+const db = getFirestore();
+const auth = getAuth();
+const storage = getStorage();
+
+export const getLandlordInfo = async (landlordId) => {
+  const docRef = doc(db, "users", landlordId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data();
+  } else {
+    toast.error("Could not get landlord data");
+  }
+};
+export const getStoreImagesUrl = async (image) => {
+  return new Promise((resolve, reject) => {
+    const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+    const storageRef = ref(storage, "images/" + fileName);
+
+    const uploadTask = uploadBytesResumable(storageRef, image);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+          default:
+            break;
+        }
+      },
+      (error) => {
+        reject(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          resolve(downloadURL);
+        });
+      }
+    );
+  });
+};
+export const getListing = async (listingId) => {
+  const docRef = doc(db, "listings", listingId);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+};
+export const getUserListings = async (userId) => {
+  const collectionRef = collection(db, "listings");
+  const q = query(
+    collectionRef,
+    where("userRef", "==", userId),
+    orderBy("timestamp", "desc")
+  );
+
+  const querySnap = await getDocs(q);
+  return querySnap.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    data: docSnapshot.data(),
+  }));
+};
+// export const deleteStoreImages = async () => {
+//   const fileName = `${10}`;
+//   const storageRef = ref(storage, "images/" + fileName);
+//   deleteObject();
+// };
 export const addCollectionAndDocuments = async (
   collectionKey,
   objectsToAdd,
@@ -78,6 +162,16 @@ export const deleteListingDocument = async (listingId) => {
 export const getCategoryAndDocuments = async () => {
   const collectionRef = collection(db, "listings");
   const q = query(collectionRef);
+
+  const querySnapShot = await getDocs(q);
+  return querySnapShot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    data: docSnapshot.data(),
+  }));
+};
+export const getListingsForExplore = async () => {
+  const collectionRef = collection(db, "listings");
+  const q = query(collectionRef, limit(5));
 
   const querySnapShot = await getDocs(q);
   return querySnapShot.docs.map((docSnapshot) => ({
@@ -128,9 +222,7 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
-export const signInWithGooglePopup = () =>
-  signInWithPopup(auth, googleProvider);
-
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
 export const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(
@@ -143,7 +235,6 @@ export const getCurrentUser = () => {
     );
   });
 };
-
 export const sendPasswordReset = async (email) => {
   if (!email) return;
 

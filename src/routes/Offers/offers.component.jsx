@@ -5,7 +5,6 @@ import Spinner from "../../components/Spinner/spinner.component";
 
 const Offers = () => {
     const { listings, deleteListing } = useContext(CategoryContext);
-
     return (
         <div className="category">
             <header>
@@ -13,7 +12,6 @@ const Offers = () => {
                     Offers
                 </p>
             </header>
-
             {listings.length > 0
                 ? <main>
                     <ul className="categoryListings">
@@ -21,14 +19,14 @@ const Offers = () => {
                             .filter((listing) => listing.data.offer)
                             .map((listing) => {
                                 const { id, data } = listing;
-                                console.log(data);
                                 return (
                                     <ListingItem key={id} id={id} listing={data} onDelete={deleteListing} />
                                 );
                             })}
                     </ul>
                 </main>
-                : <p>No Offers</p>}
+                : <Spinner />}
+                {/* // : <p>No Offers</p> */}
         </div>
     );
 }
