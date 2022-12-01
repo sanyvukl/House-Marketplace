@@ -30,10 +30,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "node_modules/react-scripts/bin/react-scripts.js start",
-    "build": "node_modules/react-scripts/bin/react-scripts.js build",
-    "test": "node_modules/react-scripts/bin/react-scripts.js test",
-    "eject": "node_modulnode_modules/react-scripts/bin/react-scripts.js eject"
+    "start": "NODE_ENV=development node_modules/react-scripts/bin/react-scripts.js start",
+    "build": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js build",
+    "test": "NODE_ENV=test node_modules/react-scripts/bin/react-scripts.js test",
+    "eject": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js eject"
   },
   "eslintConfig": {
     "extends": [
