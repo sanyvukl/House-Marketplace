@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../../context/user/user.context";
 import { CategoryContext } from "../../context/category/category.context";
 import Spinner from "../Spinner/spinner.component";
@@ -8,11 +8,14 @@ import { getStoreImagesUrl } from "../../utils/firebase/firebase.utils";
 import { serverTimestamp } from "firebase/firestore";
 import config from "../../config.json";
 
-const CreateListing = () => {
+const EditListing = () => {
+    const params = useParams();
     const navigate = useNavigate();
     const { currentUser, isUserLoading } = useContext(UserContext);
-    const { addListingItem } = useContext(CategoryContext);
-    const [formData, setFormData] = useState({
+    const { getListingItem, updateListingItem } = useContext(CategoryContext);
+    const [geolocationEnabled, setGeolocationEnabled] = useState(true);
+
+    const [listingData, setListingData] = useState({
         type: "rent",
         name: "",
         bedrooms: 1,
@@ -26,9 +29,7 @@ const CreateListing = () => {
         furnished: false,
         offer: false,
         parking: false,
-        userRef: "",
     });
-    const [geolocationEnabled, setGeolocationEnabled] = useState(true);
 
     const {
         type, name, bedrooms, bathrooms,
@@ -36,29 +37,37 @@ const CreateListing = () => {
         address, latitude, longitude,
         images, furnished, offer,
         parking, userRef,
-    } = formData;
+    } = listingData;
 
     useEffect(() => {
-        if (currentUser) {
-            setFormData({ ...formData, userRef: currentUser.uid });
-        } else {
-            navigate("/sign-in");
+        if (!currentUser) navigate("/sign-in");
+        const fetchListing = async () => {
+            const data = await getListingItem(params.listingId);
+            setListingData({ ...data, address: data.location });
         }
+        fetchListing();
     }, []);
+
+    useEffect(() => {
+        if (listingData.userRef && listingData.userRef !== currentUser.uid) {
+            toast.error("You can't edit this listing");
+            navigate("/");
+        }
+    }, [listingData])
 
     const onChangeHandler = (e) => {
         const { name, value } = e.target;
         if (value === "true") {
-            return setFormData({ ...formData, [name]: true });
+            return setListingData({ ...listingData, [name]: true });
         }
         if (value === "false") {
-            return setFormData({ ...formData, [name]: false });
+            return setListingData({ ...listingData, [name]: false });
         }
         if (e.target.files) {
-            return setFormData({ ...formData, [name]: e.target.files })
+            return setListingData({ ...listingData, [name]: e.target.files })
         }
 
-        setFormData({ ...formData, [name]: value });
+        setListingData({ ...listingData, [name]: value });
     };
 
     const onSubmitHandler = async (e) => {
@@ -72,7 +81,7 @@ const CreateListing = () => {
             return;
         }
         if (discountedPrice === 0 && regularPrice > 0) {
-            setFormData({ ...formData, discountedPrice: 0, offer: false });
+            setListingData({ ...listingData, discountedPrice: 0, offer: false });
         }
         let geolocation = {};
         let location;
@@ -99,6 +108,7 @@ const CreateListing = () => {
             toast.error("Images not uploaded");
             return;
         });
+
         const listing = {
             type, name, bathrooms,
             bedrooms, regularPrice,
@@ -108,15 +118,16 @@ const CreateListing = () => {
             timestamp: serverTimestamp(),
             userRef,
         };
-        // Adding Listing
-        const listingId = await addListingItem(listing);
-        navigate(`/category/${type}/${listingId}`);
+
+        // Updating Listing
+        await updateListingItem(params.listingId, listing);
+        navigate(`/category/${type}/${params.listingId}`);
     };
 
-    return isUserLoading ? <Spinner /> : (
+    return isUserLoading || !listingData.userRef ? <Spinner /> : (
         <div className="profile">
             <header>
-                <p className="pageHeader">Create a Listing</p>
+                <p className="pageHeader">Edit a Listing</p>
             </header>
 
             <main>
@@ -344,7 +355,7 @@ const CreateListing = () => {
                         required
                     />
                     <button type="submit" className="primaryButton createListingButton">
-                        Create Listing
+                        Update Listing
                     </button>
                 </form>
             </main>
@@ -352,4 +363,4 @@ const CreateListing = () => {
     );
 }
 
-export default CreateListing;
+export default EditListing;

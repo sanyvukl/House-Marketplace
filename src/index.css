@@ -51,6 +51,7 @@ button {
   }
 }
 
+
 .textarea {
   padding: 1rem 1.5rem;
   height: 300px;
@@ -284,7 +285,16 @@ button {
   text-align: center;
   margin-bottom: 3rem;
 }
-
+@media (min-width: 800px) {
+  .explore {
+    margin-bottom: 7rem;
+  }
+}
+@media (max-width: 750px) {
+  .explore {
+    margin-bottom: 5rem;
+  }
+}
 @media (min-width: 1217px) {
   .explore {
     margin-bottom: 10rem;

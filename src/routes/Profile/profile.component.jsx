@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/user/user.context";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,9 +7,6 @@ import homeIcon from "../../assets/svg/homeIcon.svg";
 import Spinner from "../../components/Spinner/spinner.component";
 import MyListings from "../../components/my-listings/my-listings.component";
 import { getCurrentUser } from "../../utils/firebase/firebase.utils";
-import { getUserListings } from "../../utils/firebase/firebase.utils";
-
-import ListingItem from "../../components/listing-item/listing-item";
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -26,7 +23,7 @@ const Profile = () => {
             setCurrentUserInfo(user);
         }
         getUser();
-    }, [])
+    }, [currentUser])
 
     const onLogOutHandle = () => {
         logOutUser();
@@ -59,7 +56,6 @@ const Profile = () => {
             return;
         }
     };
-
 
 
     return currentUserInfo.displayName === null ? <Spinner /> : (

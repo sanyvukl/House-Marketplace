@@ -14,6 +14,7 @@ import Category from "./components/category/category.component";
 import CreateListing from "./components/create-listing/create-listing.component";
 import Listing from "./components/listing/listing.component";
 import Contact from "./components/contact/contact.component";
+import EditListing from "./components/edit-listing/edit-listing.component";
 
 import { useContext } from "react";
 import { UserContext } from "./context/user/user.context";
@@ -24,6 +25,7 @@ import { getCategoryAndDocuments } from "./utils/firebase/firebase.utils";
 const App = () => {
   const { setCurrentUser } = useContext(UserContext);
   const { setListings } = useContext(CategoryContext);
+
 
   useEffect(() => {
     const getUserData = async () => {
@@ -47,10 +49,8 @@ const App = () => {
         <Route path="/" element={<Navigation />}>
           <Route index={true} element={<Explore />} />
           <Route path="category/:categoryName" element={<Category />} />
-          <Route
-            path="category/:categoryName/:listingId"
-            element={<Listing />}
-          />
+          <Route path="category/:categoryName/:listingId" element={<Listing />}/>
+          <Route path="edit-listing/:listingId" element={<EditListing />} />
           <Route path="offers" element={<Offers />} />
           <Route path="profile" element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />

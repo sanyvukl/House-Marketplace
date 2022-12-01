@@ -33,9 +33,9 @@ import {
 import {
   getStorage,
   ref,
-  deleteObject,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject,
 } from "firebase/storage";
 import { toast } from "react-toastify";
 
@@ -70,7 +70,6 @@ export const getStoreImagesUrl = async (image) => {
   return new Promise((resolve, reject) => {
     const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
     const storageRef = ref(storage, "images/" + fileName);
-
     const uploadTask = uploadBytesResumable(storageRef, image);
     uploadTask.on(
       "state_changed",
@@ -78,16 +77,16 @@ export const getStoreImagesUrl = async (image) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         console.log("Upload is " + progress + "% done");
-        switch (snapshot.state) {
-          case "paused":
-            console.log("Upload is paused");
-            break;
-          case "running":
-            console.log("Upload is running");
-            break;
-          default:
-            break;
-        }
+        // switch (snapshot.state) {
+        //   case "paused":
+        //     console.log("Upload is paused");
+        //     break;
+        //   case "running":
+        //     console.log("Upload is running");
+        //     break;
+        //   default:
+        //     break;
+        // }
       },
       (error) => {
         reject(error);
@@ -100,6 +99,14 @@ export const getStoreImagesUrl = async (image) => {
     );
   });
 };
+export const deleteStoreImages = async (imageUrl) => {
+  const deleteRef = ref(
+    storage,
+    "images/mF7yaaTeWhbVvNjt8BR6JpHOvpj1-interior_8.jpeg-f19c69a5-3314-4c17-92a6-b25c9d75e27b"
+  );
+  return await deleteObject(deleteRef);
+};
+
 export const getListing = async (listingId) => {
   const docRef = doc(db, "listings", listingId);
   const docSnap = await getDoc(docRef);
@@ -121,11 +128,6 @@ export const getUserListings = async (userId) => {
     data: docSnapshot.data(),
   }));
 };
-// export const deleteStoreImages = async () => {
-//   const fileName = `${10}`;
-//   const storageRef = ref(storage, "images/" + fileName);
-//   deleteObject();
-// };
 export const addCollectionAndDocuments = async (
   collectionKey,
   objectsToAdd,
@@ -144,6 +146,10 @@ export const addCollectionAndDocuments = async (
 export const addListingDocument = async (data) => {
   const collectionRef = collection(db, "listings");
   return await addDoc(collectionRef, data);
+};
+export const updateListing = async (listingId, newData) => {
+  const listingDocRef = doc(db, "listings", listingId);
+  return await updateDoc(listingDocRef, newData);
 };
 export const updateUserProfile = async (user, update) => {
   await updateProfile(user, update.displayName);
@@ -179,6 +185,21 @@ export const getListingsForExplore = async () => {
     data: docSnapshot.data(),
   }));
 };
+export const getCategoryLisings = async (condition, limitNumber = 5) => {
+  const collectionRef = collection(db, "listings");
+  const q = query(
+    collectionRef,
+    where(condition[0], condition[1], condition[2]),
+    orderBy("timestamp", "desc"),
+    limit(limitNumber)
+  );
+
+  const querySnapShot = await getDocs(q);
+  return querySnapShot.docs.map((docSnapshot) => ({
+    id: docSnapshot.id,
+    data: docSnapshot.data(),
+  }));
+};
 export const createUserDocumentFromAuth = async (
   userAuth,
   additionalInformation = {}
@@ -197,6 +218,7 @@ export const createUserDocumentFromAuth = async (
         createdAt,
         ...additionalInformation,
       });
+      await updateProfile(userAuth, additionalInformation);
     } catch (error) {
       console.log(`error creating the user ${error.message}`);
     }
@@ -222,7 +244,8 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
-export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+export const signInWithGooglePopup = () =>
+  signInWithPopup(auth, googleProvider);
 export const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(

@@ -17,10 +17,10 @@ export const UserContext = createContext({
     isUserLoading: null,
     setCurrentUser: () => null,
     setIsUserLoading: () => null,
-    logOutUser: () => null,
-    signInWithEmail: () => null,
-    signInWithGoogle: () => null,
-    signUpWithEmail: () => null,
+    logOutUser: async () => null,
+    signInWithEmail: async () => null,
+    signInWithGoogle: async () => null,
+    signUpWithEmail: async () => null,
 });
 
 export const UserProvider = ({ children }) => {
@@ -88,7 +88,6 @@ export const UserProvider = ({ children }) => {
     const signUpWithEmail = async (email, password, additionalInfo = {}) => {
         const { user } = await createAuthUserWithEmailAndPassword(email, password);
         await createUserDocumentFromAuth(user, additionalInfo);
-        // await updateProfile(user, additionalInfo);
         toast.success("Signed Up Succesfully");
         await signInWithEmail(email, password);
     };
