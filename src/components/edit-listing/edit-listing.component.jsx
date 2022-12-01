@@ -6,7 +6,7 @@ import Spinner from "../Spinner/spinner.component";
 import { toast } from "react-toastify";
 import { getStoreImagesUrl } from "../../utils/firebase/firebase.utils";
 import { serverTimestamp } from "firebase/firestore";
-import config from "../../config.json";
+// import config from "../../config.json";
 
 const EditListing = () => {
     const params = useParams();
@@ -88,7 +88,7 @@ const EditListing = () => {
         if (geolocationEnabled) {
             const responce = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${address}
-                 &key=${config.GOOGLE_MAPS_API_KEY}`);
+                 &key=AIzaSyCjtfnkdDwh4I7yR1CV77cXIk5ljioYVxw`);
             const data = await responce.json();
             geolocation.lat = data.results[0]?.geometry.location.lat ?? 0;
             geolocation.lng = data.results[0]?.geometry.location.lng ?? 0;
