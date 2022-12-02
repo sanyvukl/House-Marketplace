@@ -105,7 +105,9 @@ const SignIn = () => {
                 </div>
             </form>
             <Oauth onClick={GoogleSignIn} imageUrl={googleIcon} signInMethod={GoogleSignIn} />
-            <Link to="/sign-up" className="registerLink">Sign Up Instead</Link>
+            <div className="registerLinkContainer">
+                <Link to="/sign-up" className="registerLink">Sign Up Instead</Link>
+            </div>
         </div>
     );
 };

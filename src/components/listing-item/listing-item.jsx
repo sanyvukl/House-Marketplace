@@ -40,8 +40,8 @@ const ListingItem = ({ listing, id, onDelete, onEdit }) => {
                     </div>
                 </div>
             </Link>
-            {(onDelete && currentUser.uid === listing.userRef) && <DeleteIcon className="removeIcon" fill="rgb(231,76,60)" onClick={onDelete} />}
-            {(onEdit && currentUser.uid === listing.userRef) && <EditIcon className="editIcon" onClick={onEdit} />}
+            {(currentUser && onDelete && currentUser.uid === listing.userRef) && <DeleteIcon className="removeIcon" fill="rgb(231,76,60)" onClick={onDelete} />}
+            {(currentUser && onEdit && currentUser.uid === listing.userRef) && <EditIcon className="editIcon" onClick={onEdit} />}
         </li>
     )
 }
