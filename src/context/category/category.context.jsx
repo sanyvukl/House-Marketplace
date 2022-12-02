@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState, useReducer } from "react";
 import {
     deleteListingDocument,
     getCategoryAndDocuments,
@@ -6,8 +6,27 @@ import {
     updateListing,
     getListing,
 } from "../../utils/firebase/firebase.utils";
+import { createAction } from "../../utils/reducer/reducer.utils";
 import { toast } from "react-toastify";
 
+const CATEGORY_ACTION_TYPE = {
+    SET_CATEGORIES: "category/SET_CATEGORIES"
+}
+const CATEGORY_INITIAL_STATE = {
+    listings: null
+}
+
+export const CategoryReducer = (state, action) => {
+    console.log(action);
+    const { type, payload } = action;
+
+    switch (type) {
+        case CATEGORY_ACTION_TYPE.SET_CATEGORIES:
+            return { ...state, listings: payload };
+        default:
+            throw new Error(`Unhandled type ${type} in CategoryReducer`);
+    }
+}
 
 export const CategoryContext = createContext({
     listings: [],
@@ -19,13 +38,16 @@ export const CategoryContext = createContext({
     deleteListingItem: async (listingId) => null,
 });
 
-export const fetchCategories = async () => {
+
+const fetchCategories = async () => {
     const listings = await getCategoryAndDocuments();
     return listings;
 }
 
 export const CategoriesProvider = ({ children }) => {
-    const [listings, setListings] = useState([]);
+    const [{ listings }, dispatch] = useReducer(CategoryReducer, CATEGORY_INITIAL_STATE);
+
+    const setListings = (state) => dispatch(createAction(CATEGORY_ACTION_TYPE.SET_CATEGORIES, state));
 
     const addListingItem = async (listing) => {
         try {
@@ -54,8 +76,8 @@ export const CategoriesProvider = ({ children }) => {
             await updateListing(listingId, newData);
             toast.success("Listing was edited");
         } catch (error) {
-            console.log(error);   
-            toast.error("Error happened");         
+            console.log(error);
+            toast.error("Error happened");
         }
     }
 

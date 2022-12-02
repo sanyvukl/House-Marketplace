@@ -1,47 +1,52 @@
-import { createContext } from "react";
-import { useState, useEffect } from "react";
+import { createContext, useState, useEffect, useReducer } from "react";
 import {
     onAuthStateChangedListener,
     signInUserWithEmailAndPassword,
     createUserDocumentFromAuth,
     signInWithGooglePopup,
     createAuthUserWithEmailAndPassword,
+    updateUserDocument,
+    updateUserProfile,
+    signOutUser,
+    getUser,
+    sendPasswordReset,
 } from "../../utils/firebase/firebase.utils";
-import { updateUserDocument, updateUserProfile } from "../../utils/firebase/firebase.utils";
-
 import { toast } from "react-toastify";
-import { signOutUser } from "../../utils/firebase/firebase.utils";
+
+import { createAction } from "../../utils/reducer/reducer.utils"
 
 export const UserContext = createContext({
     currentUser: null,
-    isUserLoading: null,
     setCurrentUser: () => null,
-    setIsUserLoading: () => null,
-    logOutUser: async () => null,
-    signInWithEmail: async () => null,
-    signInWithGoogle: async () => null,
-    signUpWithEmail: async () => null,
 });
 
-export const UserProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState({});
-    const [isLogged, setIsLogged] = useState(false);
-    const [isUserLoading, setIsUserLoading] = useState(false);
+const USER_ACTION_TYPES = {
+    SET_CURRENT_USER: "user/SET_CURRENT_USER",
+    SEND_USER_PASSWORD_RESET: "user/SEND_USER_PASSWORD_RESET",
+}
+const USER_INITIAL_STATE = {
+    currentUser: null,
+}
 
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChangedListener(async (user) => {
-    //         if (user) {
-    //             try {
-    //                 await createUserDocumentFromAuth(user);
-    //                 setCurrentUser(user);
-    //                 console.log("User Seted auto");
-    //             } catch (error) {
-    //                 toast.error("Incorrect User Credentials");
-    //             }
-    //         }
-    //     });
-    //     unsubscribe();
-    // }, []);
+const UserReducer = (state, action) => {
+    console.log(action);
+    const { type, payload } = action;
+
+    switch (type) {
+        case USER_ACTION_TYPES.SET_CURRENT_USER:
+            return { ...state, currentUser: payload }
+        default:
+            throw new Error(`Unhandled type ${type} in userReduser`);
+    };
+};
+
+export const UserProvider = ({ children }) => {
+    const [{ currentUser }, dispatch] = useReducer(UserReducer, USER_INITIAL_STATE);
+
+    const setCurrentUser = (user) => {
+        dispatch(createAction(USER_ACTION_TYPES.SET_CURRENT_USER, user))
+    };
+    const [isUserLoading, setIsUserLoading] = useState(false);
 
     const checkErrors = (error) => {
         switch (error.code) {
@@ -60,16 +65,6 @@ export const UserProvider = ({ children }) => {
         };
         setIsUserLoading(false);
     };
-    const logOutUser = async () => {
-        try {
-            await signOutUser();
-            setCurrentUser(null);
-            setIsLogged(false);
-            toast.success("Log Out Successfully");
-        } catch (error) {
-            toast.error("Incorrect User Credentials");
-        }
-    };
     const signInWithEmail = async (email, password) => {
         const { user } = await signInUserWithEmailAndPassword(email, password);
         setCurrentUser(user);
@@ -79,7 +74,6 @@ export const UserProvider = ({ children }) => {
             const { user } = await signInWithGooglePopup();
             await createUserDocumentFromAuth(user);
             setCurrentUser(user);
-            setIsLogged(true);
             toast.success("Signed In Succesfully");
         } catch (error) {
             checkErrors(error);
@@ -96,8 +90,33 @@ export const UserProvider = ({ children }) => {
         await updateUserProfile(currentUser, update);
         await updateUserDocument(currentUser.uid, update);
     };
+    const logOutUser = async () => {
+        try {
+            await signOutUser();
+            setCurrentUser(null);
+            toast.success("Log Out Successfully");
+        } catch (error) {
+            toast.error("Incorrect User Credentials");
+        }
+    };
 
-    const value = { currentUser, isLogged, isUserLoading, setIsUserLoading, setCurrentUser, logOutUser, signInWithEmail, signInWithGoogle, signUpWithEmail, updateUserData };
+    const value = {
+        currentUser, isUserLoading,
+        setIsUserLoading, setCurrentUser,
+        logOutUser, signInWithEmail,
+        signInWithGoogle, signUpWithEmail,
+        updateUserData,
+    };
 
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
+
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChangedListener(async (user) => {
+    //         if (user) {
+    //             await createUserDocumentFromAuth(user);
+    //         }
+    //         setCurrentUser(user);
+    //     });
+    //     unsubscribe();
+    // }, []);
