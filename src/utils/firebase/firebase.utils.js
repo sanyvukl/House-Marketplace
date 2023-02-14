@@ -190,8 +190,7 @@ export const getCategoryLisings = async (condition, limitNumber = 5) => {
   const q = query(
     collectionRef,
     where(condition[0], condition[1], condition[2]),
-    orderBy("timestamp", "desc"),
-    limit(limitNumber)
+    orderBy("timestamp", "desc")
   );
 
   const querySnapShot = await getDocs(q);
